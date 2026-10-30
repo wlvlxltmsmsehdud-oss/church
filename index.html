@@ -348,7 +348,7 @@ else{ix=dx/L;iz=dz/L;want=2.4*Math.min(1,L/.7+.15)}}
 const ac=Math.min(1,dt*(want?7:9));vel.x+=(ix*want-vel.x)*ac;vel.y+=(iz*want-vel.y)*ac;spd=vel.length();
 if(spd>.01){P.x+=vel.x*dt;P.z+=vel.y*dt}moving=spd>.12;
 if(spd>.15&&mode==='stand')face+=angTo(face,Math.atan2(-vel.x,-vel.y))*Math.min(1,dt*9);
-if(tgt&&spd>.3&&!dn&&view3)yawT+=angTo(yawT,face)*Math.min(1,dt*1.4);
+
 if(podTaken&&inPod(P.x,P.z)&&!me.userData.onPod){P.z=POD.z-POD.d/2-.35;vel.set(0,0);if(tgt&&tgt.pod){tgt=null;ring.material.opacity=0}toast('다른 분이 단상에 서 있어요')}me.userData.onPod=inPod(P.x,P.z);
 if(mode!=='sit'){if(lvl){let k=k2(P.x,P.z),t=Math.atan2(P.x/20,(P.z+22)/44);const k0=K0-DK/2+.01,tm=TO-.03;if(k<k0||k>.978||Math.abs(t)>tm){k=clamp(k,k0,.978);t=clamp(t,-tm,tm);P.x=20*k*Math.sin(t);P.z=-22+44*k*Math.cos(t)}}
 else{P.z=Math.max(-20.5,P.z);const lane=STAIR.find(sx=>Math.abs(P.x-sx)<.9&&P.z>SZ0-.6);if(lane!==undefined){P.x=clamp(P.x,lane-.85,lane+.85);P.z=Math.min(P.z,20.2)}else{const k=(P.x/18.5)**2+((P.z+22)/42.5)**2;if(k>1){const r=1/Math.sqrt(k);P.x*=r;P.z=-22+(P.z+22)*r}}}
