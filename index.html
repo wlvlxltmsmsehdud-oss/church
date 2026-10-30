@@ -33,7 +33,7 @@ html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}body{height:100
 <div id="stage"></div><div id="veil"></div>
 <div id="name" class="pill"><strong>열방교회</strong><button class="chip" id="info" style="color:var(--muted);margin-left:2px" aria-label="이름 바꾸기"></button><input id="nk" maxlength="10" hidden aria-label="이름" style="width:96px;background:none;border:0;border-bottom:1px solid var(--edge);color:var(--fg);font:inherit;font-size:13px;margin-left:8px;-webkit-user-select:text;user-select:text"></div>
 <div id="tools" class="pill"><span id="on" style="display:flex;align-items:center;gap:6px;padding:0 8px;font-size:13px" title="지금 접속 중"><i id="dot" style="width:8px;height:8px;border-radius:50%;background:#8a8a8a"></i><b id="n">연결 중</b></span><button class="ib" id="mute" aria-label="소리 켜기/끄기">소리 켬</button><button class="ib" id="zoom" aria-label="확대">확대</button><button class="ib" id="cam" aria-label="시점 바꾸기">1인칭</button></div>
-<div id="views" class="pill"><button class="chip" data-v="rear">뒤에서</button><button class="chip" data-v="front">앞에서</button><button class="chip" data-v="stage">무대 위</button></div>
+<div id="views" class="pill"><button class="chip" data-v="rear">뒤에서</button><button class="chip" data-v="front">앞에서</button><button class="chip" data-v="stage">무대 위</button><button class="chip" data-v="up">2층</button></div>
 <div id="song" class="pill"><button class="chip" id="trk">찬양 · 오르간</button><button class="chip" id="outfit">옷 · 찬양복</button></div>
 <div id="hint">바닥이나 의자를 눌러 이동 · 드래그로 둘러보기 · 방향키/WASD</div>
 <div id="mv"><button class="mv" id="mf" aria-label="앞으로">▲</button><button class="mv" id="mb" aria-label="뒤로">▼</button></div>
@@ -95,7 +95,7 @@ const b=new THREE.Mesh(new THREE.CylinderGeometry(.22,.26,.8),M(c));b.position.s
 const h=new THREE.Mesh(new THREE.SphereGeometry(.17),M(0xd8b49a));h.position.set(x,2.9,z);S.add(h)});
 /* seats (ground floor, sittable) */
 const seats=[],BK=[[.05,.24],[.29,.48],[.53,.72]];
-for(let r=0;r<21;r++){const rho=12+r*1.25;BK.forEach(([a,b])=>{const n=Math.floor((b-a)*rho/1.05);for(let k=0;k<n;k++)[-1,1].forEach(s=>{const th=s*(a+(k+.5)*(b-a)/n),x=rho*Math.sin(th),z=-24+rho*Math.cos(th);if(z>-13&&(x/18.8)**2+((z+22)/42.5)**2<1)seats.push([x,z,th])})})}
+for(let r=0;r<21;r++){const rho=12+r*1.25;BK.forEach(([a,b])=>{const n=Math.floor((b-a)*rho/1.05);for(let k=0;k<n;k++)[-1,1].forEach(s=>{const th=s*(a+(k+.5)*(b-a)/n),x=rho*Math.sin(th),z=-24+rho*Math.cos(th);if(z>-13&&(x/18.8)**2+((z+22)/42.5)**2<1&&!(a===.53&&s<0&&r<=6))seats.push([x,z,th])})})}
 const IM=(g,c,n)=>{const m=new THREE.InstancedMesh(g,M(c),n);S.add(m);return m};
 const RB=(w,h,d,r)=>{const sh=new THREE.Shape(),x=-w/2,y=-h/2;sh.moveTo(x+r,y);sh.lineTo(x+w-r,y);sh.quadraticCurveTo(x+w,y,x+w,y+r);sh.lineTo(x+w,y+h-r);sh.quadraticCurveTo(x+w,y+h,x+w-r,y+h);sh.lineTo(x+r,y+h);sh.quadraticCurveTo(x,y+h,x,y+h-r);sh.lineTo(x,y+r);sh.quadraticCurveTo(x,y,x+r,y);const g=new THREE.ExtrudeGeometry(sh,{depth:d,bevelEnabled:true,bevelSize:.02,bevelThickness:.02,bevelSegments:2,curveSegments:4});g.translate(0,0,-d/2);return g};
 const N=seats.length,mt=new THREE.Matrix4(),
@@ -112,28 +112,82 @@ S.add(new THREE.HemisphereLight(0xb8bce8,0x2a2220,.4));
 const sp=new THREE.SpotLight(0xfff0d8,1.6,45,.5,.5);sp.position.set(0,10,-8);sp.target.position.set(0,3.8,-21.9);S.add(sp,sp.target);
 const sl=new THREE.PointLight(0xcbb7ff,.9,22);sl.position.set(0,6,-16);S.add(sl);
 /* 2F: image only */
+const TO=1.25,RW=8,K0=.725,DK=.032,RH=.3,FOHK=.81,FOHY=4.1+3*RH,seats2=[];let seat2M=[];
+const k2=(x,z)=>Math.hypot(x/20,(z+22)/44);
 {const sh=new THREE.Shape(),o=1.25,n=1.08;
 for(let i=0;i<=24;i++){const t=-o+2*o*i/24,x=20*Math.sin(t),y=-44*Math.cos(t);i?sh.lineTo(x,y):sh.moveTo(x,y)}
 for(let i=0;i<=24;i++){const t=n-2*n*i/24;sh.lineTo(14*Math.sin(t),-30*Math.cos(t))}
 const sl2=new THREE.Mesh(new THREE.ShapeGeometry(sh).rotateX(-Math.PI/2),M(0x3a3430,{side:THREE.DoubleSide}));sl2.position.set(0,4.1,-22);S.add(sl2);
 HE(14,.9,30,4.55,M(0x5a4636,{side:THREE.DoubleSide}),true,-1.08,2.16);HE(14,.3,30,3.95,M(0x2a2420,{side:THREE.DoubleSide}),true,-1.08,2.16);
-const RW=8,K0=.725,DK=.032,RH=.3,TO=1.25,band=(k0,k1)=>{const q=new THREE.Shape();for(let i=0;i<=40;i++){const t=-TO+2*TO*i/40;q[i?'lineTo':'moveTo'](20*k1*Math.sin(t),-44*k1*Math.cos(t))}for(let i=0;i<=40;i++){const t=TO-2*TO*i/40;q.lineTo(20*k0*Math.sin(t),-44*k0*Math.cos(t))}return new THREE.ShapeGeometry(q).rotateX(-Math.PI/2)};
+const band=(k0,k1)=>{const q=new THREE.Shape();for(let i=0;i<=40;i++){const t=-TO+2*TO*i/40;q[i?'lineTo':'moveTo'](20*k1*Math.sin(t),-44*k1*Math.cos(t))}for(let i=0;i<=40;i++){const t=TO-2*TO*i/40;q.lineTo(20*k0*Math.sin(t),-44*k0*Math.cos(t))}return new THREE.ShapeGeometry(q).rotateX(-Math.PI/2)};
 const fM=M(0x3e3834,{side:THREE.DoubleSide}),rM=M(0x2c2622,{side:THREE.DoubleSide}),nM=M(0x7a5a3a,{side:THREE.DoubleSide});
 const bs=[];for(let r=0;r<RW;r++){const k=K0+r*DK,h=4.1+(r+1)*RH,k0=k-DK/2,k1=r===RW-1?.985:k+DK/2;
 const fl=new THREE.Mesh(band(k0,k1),fM);fl.position.set(0,h,-22);S.add(fl);
 const ri=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,64,1,true,-TO,2*TO),rM);ri.scale.set(20*k0,RH,44*k0);ri.position.set(0,h-RH/2,-22);S.add(ri);
 const ed=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,64,1,true,-TO,2*TO),nM);ed.scale.set(20*k0+.01,.03,44*k0+.01);ed.position.set(0,h-.015,-22);S.add(ed);
-const st=.95/(32*k);for(let t=-TO+.03;t<=TO-.03;t+=st){const x=20*k*Math.sin(t),z=-22+44*k*Math.cos(t);if(z>-9)bs.push([x,z,Math.atan2(x,z+22),h])}}
-const A2=IM(RB(.5,.42,.1,.06).rotateX(-Math.PI/2),0x6a1520,bs.length),B3=IM(RB(.5,.62,.09,.08),0x6a1520,bs.length),B4=IM(RB(.58,.74,.05,.08),0x7a4022,bs.length);
-bs.forEach(([x,z,al,h],i)=>{pm(A2,x,z,al,0,h+.44,-.02,i);pm(B3,x,z,al,0,h+.8,.24,i,.14);pm(B4,x,z,al,0,h+.8,.29,i,.14)})}
+const st=.95/(32*k);for(let t=-TO+.03;t<=TO-.03;t+=st){const x=20*k*Math.sin(t),z=-22+44*k*Math.cos(t);if(z>-9&&!(r<=2&&Math.abs(x)<2.9))bs.push([x,z,Math.atan2(x,z+22),h])}}
+seats2.push(...bs);const A2=IM(RB(.5,.42,.1,.06).rotateX(-Math.PI/2),0x6a1520,bs.length),B3=IM(RB(.5,.62,.09,.08),0x6a1520,bs.length),B4=IM(RB(.58,.74,.05,.08),0x7a4022,bs.length);
+bs.forEach(([x,z,al,h],i)=>{pm(A2,x,z,al,0,h+.44,-.02,i);pm(B3,x,z,al,0,h+.8,.24,i,.14);pm(B4,x,z,al,0,h+.8,.29,i,.14)});seat2M=[A2,B3,B4]}
+
+/* FOH booth on the 2F front centre */
+{const kz=k=>-22+44*k,z0=kz(K0-DK/2),z1=kz(FOHK),zc=(z0+z1)/2;
+const pl=B(5.6,FOHY-4.1,z1-z0,0x2e2a28,0,(FOHY+4.1)/2,zc);const rail=B(5.6,.9,.08,M(0xcfe0ee,{transparent:true,opacity:.25,roughness:.1}),0,FOHY+.45,z0+.05);
+const fd=cv(512,128,(g,w,h)=>{g.fillStyle='#1b1d22';g.fillRect(0,0,w,h);for(let i=0;i<32;i++){const x=10+i*15.5;g.fillStyle='#2c3038';g.fillRect(x,8,10,112);g.fillStyle='#8a8f99';g.fillRect(x+1,60+((i*37)%40),8,10);g.fillStyle=['#e05050','#e0c050','#50c070','#5090e0'][i%4];g.fillRect(x+2,14,6,6);g.fillRect(x+2,26,6,6)}});
+const desk=new THREE.Group();desk.position.set(0,FOHY,zc+.2);S.add(desk);
+const base=new THREE.Mesh(new THREE.BoxGeometry(2.6,.75,.9),M(0x202228));base.position.y=.375;desk.add(base);
+const top=new THREE.Mesh(new THREE.BoxGeometry(2.5,.05,.85),[M(0x15161a),M(0x15161a),new THREE.MeshStandardMaterial({map:fd,roughness:.6}),M(0x15161a),M(0x15161a),M(0x15161a)]);top.position.set(0,.8,0);top.rotation.x=-.2;desk.add(top);
+[-.6,.6].forEach(x=>{const sc=cv(256,160,(g,w,h)=>{g.fillStyle='#0d1420';g.fillRect(0,0,w,h);for(let i=0;i<14;i++){g.fillStyle=i%3?'#3fb27f':'#e0c050';const hh=20+((i*53)%110);g.fillRect(12+i*17,h-10-hh,10,hh)}});
+const m=new THREE.Mesh(new THREE.BoxGeometry(.7,.45,.04),[M(0x111),M(0x111),M(0x111),M(0x111),new THREE.MeshBasicMaterial({map:sc}),M(0x111)]);m.position.set(x,1.25,.3);m.rotation.y=Math.PI;desk.add(m);const st=new THREE.Mesh(new THREE.BoxGeometry(.05,.3,.05),M(0x111));st.position.set(x,.95,.32);desk.add(st)});
+const rk=new THREE.Mesh(new THREE.BoxGeometry(.6,1.1,.6),M(0x16171b));rk.position.set(1.8,.55,.2);desk.add(rk);
+const ch=new THREE.Mesh(new THREE.CylinderGeometry(.25,.25,.08,16),M(0x111));ch.position.set(0,.5,-.75);desk.add(ch);const cp2=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.45,8),M(0x333));cp2.position.set(0,.25,-.75);desk.add(cp2);
+desk.rotation.y=Math.PI}
+/* stairwells to the 2F at the back */
+const STAIR=[-5,5],SZ0=16.4,SZ1=19.4,SH=1.6;
+STAIR.forEach(sx=>{const wz=-22+44*Math.sqrt(1-(sx/20)**2);for(let i=0;i<8;i++){const h=(i+1)*.2;B(1.8,h,.375,i%2?0x5a4636:0x604a3a,sx,h/2,SZ0+.375*i+.1875)}
+B(1.8,SH,wz-SZ1,0x5a4636,sx,SH/2,(SZ1+wz)/2);[-1,1].forEach(q=>{const r=B(.05,.05,wz-SZ0,0x9a7a52,sx+q*.92,SH/2+1,(SZ0+wz)/2);r.rotation.x=-Math.atan2(SH,SZ1-SZ0)*.6});
+const door=(y,label)=>{B(1.6,2.5,.12,0x3a2a1e,sx,y+1.25,wz-.08);PL(1.3,2.25,new THREE.MeshBasicMaterial({color:0x07070a}),sx,y+1.15,wz-.15,Math.PI);
+PL(.9,.32,BM(cv(180,64,(g,w,h)=>{g.fillStyle='#1d5c3a';g.fillRect(0,0,w,h);g.fillStyle='#fff';g.font='700 34px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(label,w/2,h/2+2)})),sx,y+2.75,wz-.16,Math.PI)};
+door(SH,'2층 ↑');door(4.1+RW*RH,'1층 ↓')});
+/* line arrays flown from the ceiling */
+[-1,1].forEach(s=>{const g=new THREE.Group();g.position.set(s*12.5,10.9,-13.8);g.rotation.y=-s*.28;S.add(g);
+const fb=new THREE.Mesh(new THREE.BoxGeometry(1.2,.07,.7),M(0x222));g.add(fb);[-.45,.45].forEach(x=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.6),M(0x555));c.position.set(x,.33,0);g.add(c)});
+let y=-.05,z=0,tl=0;[0,.02,.04,.06,.09,.12,.16,.21,.27,.34].forEach(a=>{tl=a;const cab=new THREE.Mesh(new THREE.BoxGeometry(1.1,.3,.6),[M(0x1c1c1f),M(0x1c1c1f),M(0x1c1c1f),M(0x1c1c1f),M(0x0e0e10,{roughness:1}),M(0x1c1c1f)]);y-=.3*Math.cos(tl);z-=.3*Math.sin(tl)*.5;cab.position.set(0,y,z);cab.rotation.x=tl;g.add(cab)})});
+/* band area on the floor, front right as seen from the stage */
+{const P2=(rho,th)=>[-rho*Math.sin(th),-24+rho*Math.cos(th)],rot=.946,grp=(r,t)=>{const g=new THREE.Group(),[x,z]=P2(r,t);g.position.set(x,0,z);g.rotation.y=rot;S.add(g);return g},
+add=(g,geo,c,x,y,z,o)=>{const m=new THREE.Mesh(geo,c.isMaterial||Array.isArray(c)?c:M(c,o));m.position.set(x,y,z);g.add(m);return m},cyl=(r,h,n)=>new THREE.CylinderGeometry(r,r,h,n||20);
+const [cx,cz]=P2(16,.66),pad=B(7.6,.06,4.2,0x1a1719,cx,.03,cz);pad.rotation.y=rot+Math.PI;
+const dk=grp(15.9,.67),DS=.8;dk.scale.setScalar(DS);
+add(dk,new THREE.BoxGeometry(2.6,.25,2.4),0x222024,0,.125,0);
+const shell=(c)=>[M(c,{roughness:.4}),M(0xf2efe8,{roughness:.7}),M(0xf2efe8,{roughness:.7})];
+const kick=add(dk,cyl(.32,.4,28),shell(0x7a1820),0,.57,.35);kick.rotation.x=Math.PI/2;
+add(dk,cyl(.18,.14),shell(0x7a1820),-.32,.95,-.05);
+[[-.17,1.17,.3],[.2,1.17,.3]].forEach(([x,y,z])=>{const t=add(dk,cyl(.15,.17),shell(0x7a1820),x,y,z);t.rotation.x=.35});
+add(dk,cyl(.22,.32),shell(0x7a1820),.5,.75,-.1);
+const cym=(x,y,z,r,tl)=>{add(dk,cyl(.012,y-.25,6),0x888888,x,.25+(y-.25)/2,z);const c=add(dk,new THREE.CylinderGeometry(r,r*.9,.01,28),M(0xc9a24a,{roughness:.3,metalness:.6}),x,y,z);c.rotation.x=tl};
+cym(-.65,1.15,-.05,.18,0);cym(-.55,1.55,.45,.25,.25);cym(.7,1.45,.35,.28,.2);
+add(dk,cyl(.2,.07),0x111111,0,.75,-.6);add(dk,cyl(.03,.45,8),0x444444,0,.47,-.6);
+const glass=M(0xd6ecff,{transparent:true,opacity:.22,roughness:.05,metalness:.1,side:THREE.DoubleSide,depthWrite:false});
+for(let i=0;i<5;i++){const f=-1+i*.5,pn=add(dk,new THREE.BoxGeometry(.66,1.7,.02),glass,Math.sin(f)*1.35,.25+.85,Math.cos(f)*1.35);pn.rotation.y=f;const ed=add(dk,new THREE.BoxGeometry(.02,1.7,.03),0x9aa6b2,Math.sin(f+.24)*1.36,1.1,Math.cos(f+.24)*1.36);ed.rotation.y=f}
+const kb=grp(13.1,.6);add(kb,cyl(.025,.75,6),0x222,-.35,.375,0);add(kb,cyl(.025,.75,6),0x222,.35,.375,0);const kt=add(kb,new THREE.BoxGeometry(1.1,.09,.32),0x141416,0,.8,0);add(kb,new THREE.BoxGeometry(1.0,.02,.14),0xf4f4f0,0,.85,.06);add(kb,cyl(.2,.06),0x111,0,.4,-.55);
+const amp=(r,t,c)=>{const g=grp(r,t);add(g,new THREE.BoxGeometry(.6,.6,.3),[M(0x161616),M(0x161616),M(0x161616),M(0x161616),M(c,{roughness:1}),M(0x161616)],0,.3,0);add(g,new THREE.BoxGeometry(.6,.07,.3),0x2a2a2a,0,.63,0);return g};
+amp(18.5,.71,0x2b2622);amp(18.3,.59,0x22262b);
+const gtr=(r,t,c)=>{const g=grp(r,t);add(g,new THREE.BoxGeometry(.3,.05,.3),0x111,0,.03,0);const b=add(g,new THREE.SphereGeometry(.17,16,12),M(c,{roughness:.35}),0,.32,.02);b.scale.set(1,1.25,.28);add(g,new THREE.BoxGeometry(.05,.55,.03),0x3a2a1c,0,.75,.02);return g};
+gtr(17.2,.56,0x8a1d1d);gtr(17.1,.77,0x2b3a6a);
+const mic=(r,t)=>{const g=grp(r,t);add(g,cyl(.14,.02),0x111,0,.01,0);add(g,cyl(.012,1.05,6),0x222,0,.53,0);const h=add(g,cyl(.025,.12,10),0x333,0,1.1,.05);h.rotation.x=1.1};
+mic(14.3,.54);mic(16.6,.54);mic(13.4,.7);
+const wedge=(r,t)=>{const g=grp(r,t);const w=add(g,new THREE.BoxGeometry(.55,.3,.42),[M(0x161618),M(0x161618),M(0x161618),M(0x161618),M(0x0b0b0c,{roughness:1}),M(0x161618)],0,.18,0);w.rotation.x=-.45;g.rotation.y+=Math.PI;return g};
+wedge(14.3,.47);wedge(16.6,.47)}
 /* camera & controls */
 const SC=.77,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let yaw=0,yawT=0,pit=0,phi=.38,phiT=.38,cp=0,camA=0,dist=3,view3=true,mode='stand',pray=false,tgt=null,fov=65,pv=0,hold=0,moving=false,face=0,spd=0,wp=0,mySeat=-1,myR=-1,myRt=0,rLast=0;
 const P=new THREE.Vector3(0,1,19),keys={},vel=new THREE.Vector2();
+let lvl=0,xfer=false;
 const inPod=(x,z)=>Math.abs(x-POD.x)<POD.w/2&&Math.abs(z-POD.z)<POD.d/2,inStep=(x,z)=>Math.abs(x-POD.x)<POD.w/2&&z<POD.z-POD.d/2&&z>POD.z-POD.d/2-.3;
-const groundAt=(x,z)=>{if(inPod(x,z))return 1+POD.h;if(inStep(x,z))return 1.3;for(const[a,b,h]of TIERS)if((x/a)**2+((z+22)/b)**2<1)return h;return 0};
+const g1=(x,z)=>{if(inPod(x,z))return 1+POD.h;if(inStep(x,z))return 1.3;for(const sx of STAIR)if(Math.abs(x-sx)<.9&&z>SZ0)return z>=SZ1?SH:Math.min(8,Math.floor((z-SZ0)/.375)+1)*.2;for(const[a,b,h]of TIERS)if((x/a)**2+((z+22)/b)**2<1)return h;return 0};
+const g2=(x,z)=>{const k=k2(x,z);if(Math.abs(x)<2.9&&k<FOHK)return FOHY;return 4.1+(clamp(Math.floor((k-(K0-DK/2))/DK),0,RW-1)+1)*RH};
+const gAt=(x,z,lv)=>lv?g2(x,z):g1(x,z),groundAt=(x,z)=>gAt(x,z,lvl);
 let podTaken=false;
-const stageAt=(x,z)=>groundAt(x,z)>=1,onStage=()=>stageAt(P.x,P.z);
+const stageAt=(x,z)=>g1(x,z)>=1,onStage=()=>stageAt(P.x,P.z);
 const eyeH=()=>groundAt(P.x,P.z)+(mode==='sit'?.9:mode==='kneel'?.62:1);
 const setYaw=v=>{yaw=yawT=v};
 let tT=0;function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(tT);tT=setTimeout(()=>e.style.opacity=0,2200)}
@@ -141,15 +195,16 @@ function ui(){$('sit').setAttribute('aria-pressed',mode==='sit');$('kneel').setA
 function stand(){if(mode==='sit'){mySeat=-1}mode='stand';pray=false;ui()}
 /* one person per seat */
 const taken=new Set();
-function seatPos(i){const b=seats[i];return{x:b[0]-Math.sin(b[2])*.1,z:b[1]-Math.cos(b[2])*.1,sit:1,a:b[2],si:i}}
-function seatNear(x,z){let bi=-1,d=1e9;seats.forEach((s,i)=>{if(taken.has(i))return;const e=(s[0]-x)**2+(s[1]-z)**2;if(e<d){d=e;bi=i}});return bi<0?null:seatPos(bi)}
+const N1=seats.length,SEAT=i=>{const b=i<N1?seats[i]:seats2[i-N1];return b?{x:b[0],z:b[1],a:b[2],lv:i<N1?0:1}:null};
+function seatPos(i){const b=SEAT(i);return{x:b.x-Math.sin(b.a)*.1,z:b.z-Math.cos(b.a)*.1,sit:1,a:b.a,si:i,lv:b.lv}}
+function seatNear(x,z){let bi=-1,d=1e9;const arr=lvl?seats2:seats,o=lvl?N1:0;arr.forEach((s,i)=>{if(taken.has(i+o))return;const e=(s[0]-x)**2+(s[1]-z)**2;if(e<d){d=e;bi=i+o}});return bi<0?null:seatPos(bi)}
 const ring=new THREE.Mesh(new THREE.RingGeometry(.22,.3,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xc9b2ff,transparent:true,opacity:0,depthWrite:false}));S.add(ring);
 function goTo(t){tgt=t;ring.position.set(t.x,groundAt(t.x,t.z)+.02,t.z);ring.material.opacity=.9}
-$('sit').onclick=()=>{if(mode==='sit'){stand();return}stand();const sn=seatNear(P.x||1,clamp(P.z,-6,15));if(!sn){toast('빈자리가 없어요');return}goTo(sn)};
+$('sit').onclick=()=>{if(mode==='sit'){stand();return}stand();const sn=seatNear(P.x||1,lvl?P.z:clamp(P.z,-6,15));if(!sn){toast('빈자리가 없어요');return}goTo(sn)};
 let swing=0;$('pray').onclick=()=>{pray=!pray;tgt=null;ring.material.opacity=0;if(view3){yawT=pray?face+2.5:face;swing=1}ui()};
-$('kneel').onclick=()=>{if(mode==='kneel'){mode='stand';ui();return}if(mode==='sit'){const a=seats[mySeat];if(a){P.x-=Math.sin(a[2])*.5;P.z-=Math.cos(a[2])*.5}mySeat=-1}mode='kneel';tgt=null;ring.material.opacity=0;ui()};
-const go={rear:[0,19,0],front:[0,-12,0],stage:[0,-18,Math.PI]};
-document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const v=go[b.dataset.v];stand();tgt=null;ring.material.opacity=0;P.x=v[0];P.z=v[1];vel.set(0,0);setYaw(v[2]);face=v[2];camA=v[2];pit=0;phiT=.38});
+$('kneel').onclick=()=>{if(mode==='kneel'){mode='stand';ui();return}if(mode==='sit'){const a=SEAT(mySeat);if(a){P.x-=Math.sin(a.a)*.5;P.z-=Math.cos(a.a)*.5}mySeat=-1}mode='kneel';tgt=null;ring.material.opacity=0;ui()};
+const go={rear:[0,15,0,0],front:[0,-12,0,0],stage:[0,-18,Math.PI,0],up:[0,16.5,0,1]};
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const v=go[b.dataset.v];stand();tgt=null;ring.material.opacity=0;lvl=v[3];P.x=v[0];P.z=v[1];vel.set(0,0);me.position.y=gAt(v[0],v[1],v[3]);setYaw(v[2]);face=v[2];camA=v[2];pit=0;phiT=.38});
 $('zoom').onclick=()=>{if(view3){dist=dist>2.4?1.8:3;$('zoom').textContent=dist>2.4?'확대':'원래대로'}else{fov=fov>50?38:65;$('zoom').textContent=fov>50?'확대':'원래대로'}};
 function camLabel(){$('cam').textContent=view3?'1인칭':'캐릭터'}
 $('cam').onclick=()=>{view3=!view3;camLabel();ui()};
@@ -164,10 +219,10 @@ el.onpointercancel=e=>{if(dn&&e.pointerId===dn.id)dn=null};
 el.addEventListener('wheel',e=>{if(view3)dist=clamp(dist+e.deltaY*.004,1.4,6);else fov=clamp(fov+e.deltaY*.03,30,75)},{passive:true});
 function tap(x,y){rc.setFromCamera(v2.set(x/innerWidth*2-1,-y/innerHeight*2+1),C);
 const hp=rc.intersectObject(podMesh,false);if(hp.length){if(podTaken&&!inPod(P.x,P.z)){toast('다른 분이 단상에 서 있어요');return}stand();goTo({x:POD.x,z:POD.z,pod:1});return}
-const hs=rc.intersectObjects([sCu,bCu,bSh],false);
-if(hs.length&&hs[0].instanceId!=null&&hs[0].distance<30){const i=hs[0].instanceId;if(i===mySeat&&mode==='sit')return;if(taken.has(i)){toast('이미 다른 분이 앉아 있어요');return}stand();goTo(seatPos(i));return}
-const d=rc.ray.direction,o=rc.ray.origin;if(d.y>=-.02)return;let h=0,x0=0,z0=0;for(let k=0;k<4;k++){const t=(h-o.y)/d.y;x0=o.x+d.x*t;z0=o.z+d.z*t;const g=groundAt(x0,z0);if(g===h)break;h=g}
-const kk=(x0/18.3)**2+((z0+22)/42.3)**2;if(kk>1.05||z0<-21||Math.hypot(x0-P.x,z0-P.z)>28)return;stand();goTo({x:x0,z:z0})}
+const hs=rc.intersectObjects([sCu,bCu,bSh,...seat2M],false);
+if(hs.length&&hs[0].instanceId!=null&&hs[0].distance<30){const up2=seat2M.includes(hs[0].object),i=hs[0].instanceId+(up2?N1:0);if(up2!==!!lvl){toast(up2?'뒤쪽 계단으로 2층에 올라가서 앉아주세요':'1층으로 내려가서 앉아주세요');return}if(i===mySeat&&mode==='sit')return;if(taken.has(i)){toast('이미 다른 분이 앉아 있어요');return}stand();goTo(seatPos(i));return}
+const d=rc.ray.direction,o=rc.ray.origin;if(d.y>=-.02)return;let h=lvl?5.3:0,x0=0,z0=0;for(let k=0;k<5;k++){const t=(h-o.y)/d.y;x0=o.x+d.x*t;z0=o.z+d.z*t;const g=groundAt(x0,z0);if(g===h)break;h=g}
+if(lvl){const k=k2(x0,z0);if(k<K0-DK/2-.02||k>.99||Math.abs(Math.atan2(x0/20,(z0+22)/44))>TO)return}else{const kk=(x0/18.3)**2+((z0+22)/42.3)**2;if((kk>1.05&&!STAIR.some(sx=>Math.abs(x0-sx)<.9&&z0<20.5))||z0<-21)return}if(Math.hypot(x0-P.x,z0-P.z)>28)return;stand();goTo({x:x0,z:z0})}
 function resize(){C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix();R.setSize(innerWidth,innerHeight,false)}addEventListener('resize',resize);resize();
 /* characters */
 const SKIN=0xe9c7a4,HAIR=0x3e2c20;
@@ -245,16 +300,16 @@ function mkRemote(key,look){const g=mkChar(look,hue(key));Object.assign(g.userDa
 function peersChanged(ch){const seen=new Set();let n=0;taken.clear();podTaken=false;ch.peers.forEach(p=>{n++;if(p.isMe&&p.sameTab)return;const pr=p.presence;if(p.kind!=='viewer'||!pr||typeof pr.x!=='number')return;if(p.isMe)return;const key=typeof pr.u==='string'?pr.u.slice(0,16):p.peer;seen.add(key);
 const look={g:pr.g==='f'?'f':'m',o:pr.o==='s'?'s':'r'};let g=rem.get(key);
 if(g&&g.userData.look!==look.g+look.o){const o=g,nw=mkRemote(key,look);nw.position.copy(o.position);nw.rotation.y=o.rotation.y;['tx','tz','ta','tm','tp','gone','rt'].forEach(q=>nw.userData[q]=o.userData[q]);S.remove(o);rem.set(key,nw);g=nw}
-if(!g){if(rem.size>=150)return;g=mkRemote(key,look);g.position.set(pr.x,groundAt(pr.x,pr.z),pr.z);g.rotation.y=pr.a||0;rem.set(key,g)}
-const u=g.userData;if(u.gone){u.gone=0;dim(g,false)}Object.assign(u,{tx:pr.x,tz:pr.z,ta:pr.a||0,tm:pr.m||0,tp:pr.p?1:0});lbl(g,typeof pr.nm==='string'?pr.nm.slice(0,10):'');
-if(pr.pd){podTaken=true;if(me.userData.onPod&&key<UID){P.z=POD.z-POD.d/2-.4;toast('다른 분이 먼저 단상에 섰어요')}}
-if(pr.m===1&&Number.isInteger(pr.si)&&pr.si>=0){taken.add(pr.si);if(pr.si===mySeat&&mode==='sit'&&key<UID){stand();toast('다른 분이 먼저 앉으셨어요');const a=seats[pr.si];if(a){P.x-=Math.sin(a[2])*.6;P.z-=Math.cos(a[2])*.6}}}
+if(!g){if(rem.size>=150)return;g=mkRemote(key,look);g.position.set(pr.x,gAt(pr.x,pr.z,pr.lv?1:0),pr.z);g.rotation.y=pr.a||0;rem.set(key,g)}
+const u=g.userData;if(u.gone){u.gone=0;dim(g,false)}if((pr.lv?1:0)!==(u.lv||0)){g.position.set(pr.x,gAt(pr.x,pr.z,pr.lv?1:0),pr.z)}Object.assign(u,{tx:pr.x,tz:pr.z,ta:pr.a||0,tm:pr.m||0,tp:pr.p?1:0,lv:pr.lv?1:0});lbl(g,typeof pr.nm==='string'?pr.nm.slice(0,10):'');
+if(pr.pd&&!pr.lv){podTaken=true;if(me.userData.onPod&&key<UID){P.z=POD.z-POD.d/2-.4;toast('다른 분이 먼저 단상에 섰어요')}}
+if(pr.m===1&&Number.isInteger(pr.si)&&pr.si>=0){taken.add(pr.si);if(pr.si===mySeat&&mode==='sit'&&key<UID){stand();toast('다른 분이 먼저 앉으셨어요');const a=SEAT(pr.si);if(a){P.x-=Math.sin(a.a)*.6;P.z-=Math.cos(a.a)*.6}}}
 if(typeof pr.rt==='number'){if(u.rt!==null&&pr.rt!==u.rt&&pr.r>=0&&pr.r<RX.length)bubble(g,RX[pr.r]);u.rt=pr.rt}});
 rem.forEach((g,k)=>{if(!seen.has(k)&&!g.userData.gone){g.userData.gone=Date.now();dim(g,true)}});if(!room||room.connected())$('n').textContent=Math.max(1,n)+'명'}
-function av(dt,t){const now=Date.now(),pn=performance.now();rem.forEach((g,key)=>{const u=g.userData;if(u.gone&&now-u.gone>LINGER){S.remove(g);rem.delete(key);return}const k=Math.min(1,dt*5),dx=u.tx-g.position.x,dz=u.tz-g.position.z,ox=g.position.x,oz=g.position.z;g.position.x+=dx*k;g.position.z+=dz*k;g.position.y+=(groundAt(g.position.x,g.position.z)-g.position.y)*Math.min(1,dt*8);
+function av(dt,t){const now=Date.now(),pn=performance.now();rem.forEach((g,key)=>{const u=g.userData;if(u.gone&&now-u.gone>LINGER){S.remove(g);rem.delete(key);return}const k=Math.min(1,dt*5),dx=u.tx-g.position.x,dz=u.tz-g.position.z,ox=g.position.x,oz=g.position.z;g.position.x+=dx*k;g.position.z+=dz*k;g.position.y+=(gAt(g.position.x,g.position.z,u.lv||0)-g.position.y)*Math.min(1,dt*8);
 const sp=Math.hypot(g.position.x-ox,g.position.z-oz)/Math.max(dt,1e-3);u.spd+=(sp-u.spd)*Math.min(1,dt*6);const ta=u.spd>.3&&u.tm===0?Math.atan2(-(g.position.x-ox),-(g.position.z-oz)):u.ta;g.rotation.y+=angTo(g.rotation.y,ta)*Math.min(1,dt*7);pose(g,u.tm,u.tp,u.spd,dt,t);bubTick(g,pn)});
 bubTick(me,pn);
-pt+=dt;if(room&&pt>.3){pt=0;room.presence({x:+P.x.toFixed(2),z:+P.z.toFixed(2),a:+face.toFixed(2),m:mode==='sit'?1:mode==='kneel'?2:0,p:pray?1:0,nm:myName,u:UID,g:myLook().g,o:myO,si:mode==='sit'?mySeat:-1,pd:inPod(P.x,P.z)?1:0,r:myR,rt:myRt})}}
+pt+=dt;if(room&&pt>.3){pt=0;room.presence({x:+P.x.toFixed(2),z:+P.z.toFixed(2),a:+face.toFixed(2),m:mode==='sit'?1:mode==='kneel'?2:0,p:pray?1:0,nm:myName,u:UID,g:myLook().g,o:myO,lv:lvl,si:mode==='sit'?mySeat:-1,pd:inPod(P.x,P.z)?1:0,r:myR,rt:myRt})}}
 function net(k){const on=k==='on';$('dot').style.background=on?'#7cc67a':k==='wait'?'#c9a24a':'#8a5a4a';if(!on)$('n').textContent=k==='wait'?'연결 중':'혼자 보는 중';$('on').title=on?'함께 있는 사람들과 연결됨':k==='wait'?'연결 중':'다른 사람과 연결되지 않음 · claude.ai에 로그인하고, 공유 메뉴에서 초대받은 사람만 서로 보여요'}
 /* shared room through public message relays (works on Wi-Fi and mobile data) */
 (()=>{net('wait');
@@ -268,7 +323,7 @@ const pub=(o)=>{const j=JSON.stringify(o);cl.forEach(c=>{if(c.connected)try{c.pu
 const onMsg=(tp,buf)=>{let d;try{d=JSON.parse(String(buf))}catch(e){return}if(!d||typeof d.u!=='string'||d.u===UID)return;const id=d.u.slice(0,16);
 if(d.bye){if(pp.delete(id))flush();return}
 if(typeof d.x!=='number'||typeof d.z!=='number'||!isFinite(d.x)||!isFinite(d.z))return;const o=pp.get(id);if(o&&typeof d.q==='number'&&d.q<o.q&&Date.now()-o.t<5000)return;
-const pr={x:Math.max(-25,Math.min(25,d.x)),z:Math.max(-25,Math.min(25,d.z)),a:+d.a||0,m:d.m===1||d.m===2?d.m:0,p:d.p?1:0,nm:typeof d.nm==='string'?d.nm.slice(0,10):'',u:id,g:d.g==='f'?'f':'m',o:d.o==='s'?'s':'r',si:Number.isInteger(d.si)&&d.si>=0&&d.si<20000?d.si:-1,r:Number.isInteger(d.r)&&d.r>=0&&d.r<4?d.r:-1,rt:typeof d.rt==='number'&&isFinite(d.rt)?d.rt:0,pd:d.pd?1:0};
+const pr={x:Math.max(-25,Math.min(25,d.x)),z:Math.max(-25,Math.min(25,d.z)),a:+d.a||0,m:d.m===1||d.m===2?d.m:0,p:d.p?1:0,nm:typeof d.nm==='string'?d.nm.slice(0,10):'',u:id,g:d.g==='f'?'f':'m',o:d.o==='s'?'s':'r',si:Number.isInteger(d.si)&&d.si>=0&&d.si<20000?d.si:-1,r:Number.isInteger(d.r)&&d.r>=0&&d.r<4?d.r:-1,rt:typeof d.rt==='number'&&isFinite(d.rt)?d.rt:0,pd:d.pd?1:0,lv:d.lv?1:0};
 const isNew=!o;pp.set(id,{pr,t:Date.now(),q:+d.q||0});flush();if(isNew&&cur)pub(Object.assign({},cur,{q:++seq}))};
 load(0).then(()=>{BROKERS.forEach(url=>{try{const c=window.mqtt.connect(url,{clientId:'yb_'+UID+'_'+Math.random().toString(36).slice(2,6),clean:true,keepalive:30,reconnectPeriod:4000,connectTimeout:8000,will:{topic:TOPIC,payload:JSON.stringify({u:UID,bye:1}),qos:0,retain:false}});
 c.on('connect',()=>{c.subscribe(TOPIC,{qos:0});net('on');if(cur)pub(Object.assign({},cur,{q:++seq}))});
@@ -279,6 +334,7 @@ setInterval(flush,3000);
 addEventListener('pagehide',()=>pub({u:UID,bye:1}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cur){lastT=0;room.presence(cur)}});
 })();
+function toLevel(l,sx){lvl=l;tgt=null;ring.material.opacity=0;vel.set(0,0);if(l){P.x=sx*.93;P.z=17.2}else{P.x=sx;P.z=SZ0-.7}setYaw(0);face=0;camA=0;me.position.y=groundAt(P.x,P.z);toast(l?'2층으로 올라왔어요':'1층으로 내려왔어요')}
 const clk=new THREE.Clock(),tg=new THREE.Vector3();
 (function tick(){requestAnimationFrame(tick);const dt=Math.min(clk.getDelta(),.05),t=clk.elapsedTime;
 const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+hold,s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
@@ -294,16 +350,18 @@ if(spd>.01){P.x+=vel.x*dt;P.z+=vel.y*dt}moving=spd>.12;
 if(spd>.15&&mode==='stand')face+=angTo(face,Math.atan2(-vel.x,-vel.y))*Math.min(1,dt*9);
 if(tgt&&spd>.3&&!dn&&view3)yawT+=angTo(yawT,face)*Math.min(1,dt*1.4);
 if(podTaken&&inPod(P.x,P.z)&&!me.userData.onPod){P.z=POD.z-POD.d/2-.35;vel.set(0,0);if(tgt&&tgt.pod){tgt=null;ring.material.opacity=0}toast('다른 분이 단상에 서 있어요')}me.userData.onPod=inPod(P.x,P.z);
-if(mode!=='sit'){P.z=Math.max(-20.5,P.z);const k=(P.x/18.5)**2+((P.z+22)/42.5)**2;if(k>1){const r=1/Math.sqrt(k);P.x*=r;P.z=-22+(P.z+22)*r}}
+if(mode!=='sit'){if(lvl){let k=k2(P.x,P.z),t=Math.atan2(P.x/20,(P.z+22)/44);const k0=K0-DK/2+.01,tm=TO-.03;if(k<k0||k>.978||Math.abs(t)>tm){k=clamp(k,k0,.978);t=clamp(t,-tm,tm);P.x=20*k*Math.sin(t);P.z=-22+44*k*Math.cos(t)}}
+else{P.z=Math.max(-20.5,P.z);const lane=STAIR.find(sx=>Math.abs(P.x-sx)<.9&&P.z>SZ0-.6);if(lane!==undefined){P.x=clamp(P.x,lane-.85,lane+.85);P.z=Math.min(P.z,20.2)}else{const k=(P.x/18.5)**2+((P.z+22)/42.5)**2;if(k>1){const r=1/Math.sqrt(k);P.x*=r;P.z=-22+(P.z+22)*r}}}
+for(const sx of STAIR){if(!lvl&&Math.abs(P.x-sx)<.9&&P.z>19.8)toLevel(1,sx);else if(lvl&&Math.abs(P.x-sx*.97)<1&&k2(P.x,P.z)>.968&&P.z>12)toLevel(0,sx)}}
 yaw+=angTo(yaw,yawT)*Math.min(1,dt*(swing?2.2:12));if(swing&&Math.abs(angTo(yaw,yawT))<.02)swing=0;phi+=(phiT-phi)*Math.min(1,dt*12);
-if(mode==='sit'){const a=seats[mySeat];if(a)face+=angTo(face,a[2])*Math.min(1,dt*8)}
+if(mode==='sit'){const a=SEAT(mySeat);if(a)face+=angTo(face,a.a)*Math.min(1,dt*8)}
 const gy=groundAt(P.x,P.z);me.visible=view3;me.position.set(P.x,me.position.y+(gy-me.position.y)*Math.min(1,dt*10),P.z);me.rotation.y=face;pose(me,mode==='sit'?1:mode==='kneel'?2:0,pray,spd,dt,t);
 ring.material.opacity*=tgt?1:.9;ring.scale.setScalar(1+Math.sin(t*5)*.06);
 P.y+=(eyeH()-(pray?.06:0)-P.y)*Math.min(1,dt*6);pv+=((pray?-.45:mode==='kneel'?-.12:0)-pv)*Math.min(1,dt*3);
 if(view3){const sitc=mode==='sit'||mode==='kneel';camA+=angTo(camA,yaw)*Math.min(1,dt*8);
 const ty=me.position.y+(mode==='sit'?.8:mode==='kneel'?.6:.85);tg.set(P.x-Math.sin(camA)*.35,ty,P.z-Math.cos(camA)*.35);cp+=((sitc&&!pray?.35:0)-cp)*Math.min(1,dt*3);const ph=Math.min(1.25,phi+cp),d0=dist+(sitc?.3:0);let d=d0;
 for(let i=0;i<6;i++){const cx=P.x+Math.sin(camA)*Math.cos(ph)*d,cz=P.z+Math.cos(camA)*Math.cos(ph)*d;if((cx/19)**2+((cz+22)/43)**2<1&&cz>-21.5)break;d*=.75}
-C.fov+=(58-C.fov)*Math.min(1,dt*6);C.updateProjectionMatrix();C.position.set(P.x+Math.sin(camA)*Math.cos(ph)*d,Math.min(11,ty+Math.sin(ph)*d),P.z+Math.cos(camA)*Math.cos(ph)*d);C.lookAt(tg)}
+C.fov+=(58-C.fov)*Math.min(1,dt*6);C.updateProjectionMatrix();{const cx=P.x+Math.sin(camA)*Math.cos(ph)*d,cz=P.z+Math.cos(camA)*Math.cos(ph)*d;let cy=Math.min(11,ty+Math.sin(ph)*d);if(!lvl&&k2(cx,cz)>.69)cy=Math.min(cy,3.85);C.position.set(cx,cy,cz)}C.lookAt(tg)}
 else{camA=yaw;C.fov+=(fov-C.fov)*Math.min(1,dt*6);C.updateProjectionMatrix();C.position.set(P.x,P.y,P.z);C.rotation.set(Math.max(-1.45,pit+pv),yaw,0)}
 sl.intensity=.9+Math.sin(t*1.2)*.05;av(dt,t);R.render(S,C)})();
 /* calm organ */
@@ -324,11 +382,11 @@ $('enter').disabled=!myG;
 $('enter').onclick=()=>{if(!myG){toast('성별을 골라주세요');return}saveName($('nick').value);setTrack('organ');$('gate').style.opacity=0;setTimeout(()=>$('gate').style.display='none',1000);setTimeout(()=>$('hint').style.opacity=0,9000)};
 /* keep my place for 30 minutes so switching apps doesn't start over */
 const ST='yb_state',KEEP=30*60e3;
-function saveSt(){if($('gate').style.display!=='none')return;try{localStorage.setItem(ST,JSON.stringify({t:Date.now(),x:P.x,z:P.z,yaw,f:face,si:mySeat,phi:phiT,mode,pray,v:view3?1:0,trk,mu:muted?1:0}))}catch(e){}}
+function saveSt(){if($('gate').style.display!=='none')return;try{localStorage.setItem(ST,JSON.stringify({t:Date.now(),lv:lvl,x:P.x,z:P.z,yaw,f:face,si:mySeat,phi:phiT,mode,pray,v:view3?1:0,trk,mu:muted?1:0}))}catch(e){}}
 setInterval(saveSt,2000);addEventListener('pagehide',saveSt);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){saveSt();return}if(AC&&AC.state!=='running')AC.resume();if(trk==='song'&&!muted)sg.play().catch(()=>{})});
 let rs=null;try{const o=JSON.parse(localStorage.getItem(ST)||'null');if(o&&Date.now()-o.t<KEEP&&typeof o.x==='number')rs=o}catch(e){}
-if(rs&&myG){P.x=rs.x;P.z=rs.z;setYaw(+rs.yaw||0);camA=yaw;face=typeof rs.f==='number'?rs.f:yaw;mySeat=Number.isInteger(rs.si)?rs.si:-1;phi=phiT=typeof rs.phi==='number'?rs.phi:phi;mode=['stand','sit','kneel'].includes(rs.mode)?rs.mode:'stand';if(mode==='sit'&&mySeat<0)mode='stand';pray=!!rs.pray;view3=rs.v!==0;camLabel();ui();
+if(rs&&myG){lvl=rs.lv?1:0;P.x=rs.x;P.z=rs.z;me.position.y=gAt(rs.x,rs.z,lvl);setYaw(+rs.yaw||0);camA=yaw;face=typeof rs.f==='number'?rs.f:yaw;mySeat=Number.isInteger(rs.si)?rs.si:-1;phi=phiT=typeof rs.phi==='number'?rs.phi:phi;mode=['stand','sit','kneel'].includes(rs.mode)?rs.mode:'stand';if(mode==='sit'&&mySeat<0)mode='stand';pray=!!rs.pray;view3=rs.v!==0;camLabel();ui();
 if(rs.mu){muted=true;sg.muted=true;$('mute').textContent='소리 끔'}
 $('gate').style.display='none';$('hint').textContent='돌아오셨어요 · 화면을 한 번 누르면 찬양이 다시 나와요';
 const wake=()=>{removeEventListener('pointerdown',wake,true);removeEventListener('keydown',wake,true);setTrack(rs.trk==='song'?'song':'organ')};
