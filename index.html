@@ -183,17 +183,29 @@ rem.forEach((g,k)=>{if(!seen.has(k)&&!g.userData.gone){g.userData.gone=Date.now(
 function av(dt,t){const now=Date.now();rem.forEach((g,key)=>{const u=g.userData;if(u.gone&&now-u.gone>LINGER){S.remove(g);rem.delete(key);return}const k=Math.min(1,dt*6),dx=u.tx-g.position.x,dz=u.tz-g.position.z;g.position.x+=dx*k;g.position.z+=dz*k;g.position.y+=((stageAt(g.position.x,g.position.z)?1:0)-g.position.y)*k;g.rotation.y+=angTo(g.rotation.y,u.ta)*k;pose(g,u.tm,u.tp,Math.hypot(dx,dz)>.05,dt,t)});
 pt+=dt;if(room&&pt>.3){pt=0;room.presence({x:+P.x.toFixed(2),z:+P.z.toFixed(2),a:+yaw.toFixed(2),m:mode==='sit'?1:mode==='kneel'?2:0,p:pray?1:0,nm:myName,u:UID})}}
 function net(k){const on=k==='on';$('dot').style.background=on?'#7cc67a':k==='wait'?'#c9a24a':'#8a5a4a';if(!on)$('n').textContent=k==='wait'?'연결 중':'혼자 보는 중';$('on').title=on?'함께 있는 사람들과 연결됨':k==='wait'?'연결 중':'다른 사람과 연결되지 않음 · claude.ai에 로그인하고, 공유 메뉴에서 초대받은 사람만 서로 보여요'}
-/* P2P room: browsers find each other through public relays, then talk directly */
-(async()=>{net('wait');let T=null;
-for(const u of['https://cdn.jsdelivr.net/npm/trystero@0.21.4/+esm','https://cdn.jsdelivr.net/npm/trystero@0.20.1/+esm','https://esm.sh/trystero@0.20.0','https://cdn.jsdelivr.net/npm/trystero/+esm']){try{T=await import(u);if(T&&T.joinRoom)break}catch(e){}}
-if(!T||!T.joinRoom){net('off');$('on').title='연결 모듈을 불러오지 못했어요 · 네트워크를 확인하고 새로고침해 주세요';return}
-let R2;try{R2=T.joinRoom({appId:'yeolbang-church-sanctuary-v1',rtcConfig:{iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]}},'main-hall')}catch(e){net('off');return}
-const [send,recv]=R2.makeAction('st'),pp=new Map();let last='',lastT=0,cur=null;
-const flush=()=>{const a=[{isMe:true,sameTab:true,kind:'viewer',presence:{},peer:'me'}];pp.forEach((pr,id)=>a.push({isMe:false,sameTab:false,kind:'viewer',presence:pr,peer:id}));peersChanged({peers:a})};
-recv((d,id)=>{if(!d||typeof d!=='object'||typeof d.x!=='number'||typeof d.z!=='number')return;const pr={x:+d.x||0,z:+d.z||0,a:+d.a||0,m:d.m===1||d.m===2?d.m:0,p:d.p?1:0,nm:typeof d.nm==='string'?d.nm.slice(0,10):'',u:typeof d.u==='string'?d.u.slice(0,16):id};pp.set(id,pr);flush()});
-R2.onPeerJoin(id=>{if(cur)send(cur,id)});R2.onPeerLeave(id=>{pp.delete(id);flush()});
-room={presence(o){cur=o;const j=JSON.stringify(o),now=Date.now();if(j===last&&now-lastT<2000)return;last=j;lastT=now;try{send(o)}catch(e){}},connected:()=>true};
-net('on');flush()})();
+/* shared room through public message relays (works on Wi-Fi and mobile data) */
+(()=>{net('wait');
+const TOPIC='yeolbang-church/v1/main-hall',BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081/mqtt'];
+const LIBS=['https://cdn.jsdelivr.net/npm/mqtt@4.3.7/dist/mqtt.min.js','https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js'];
+const load=(i)=>new Promise((ok,no)=>{if(window.mqtt)return ok();if(i>=LIBS.length)return no();const sc=document.createElement('script');sc.src=LIBS[i];sc.onload=()=>ok();sc.onerror=()=>load(i+1).then(ok,no);document.head.appendChild(sc)});
+const pp=new Map(),cl=[];let cur=null,last='',lastT=0,seq=0;
+const live=()=>{let k=0;cl.forEach(c=>{if(c.connected)k++});return k};
+const flush=()=>{const now=Date.now(),a=[{isMe:true,sameTab:true,kind:'viewer',presence:{},peer:'me'}];pp.forEach((v,id)=>{if(now-v.t<12000)a.push({isMe:false,sameTab:false,kind:'viewer',presence:v.pr,peer:id})});peersChanged({peers:a})};
+const pub=(o)=>{const j=JSON.stringify(o);cl.forEach(c=>{if(c.connected)try{c.publish(TOPIC,j,{qos:0})}catch(e){}})};
+const onMsg=(tp,buf)=>{let d;try{d=JSON.parse(String(buf))}catch(e){return}if(!d||typeof d.u!=='string'||d.u===UID)return;const id=d.u.slice(0,16);
+if(d.bye){if(pp.delete(id))flush();return}
+if(typeof d.x!=='number'||typeof d.z!=='number'||!isFinite(d.x)||!isFinite(d.z))return;const o=pp.get(id);if(o&&typeof d.q==='number'&&d.q<o.q&&Date.now()-o.t<5000)return;
+const pr={x:Math.max(-25,Math.min(25,d.x)),z:Math.max(-25,Math.min(25,d.z)),a:+d.a||0,m:d.m===1||d.m===2?d.m:0,p:d.p?1:0,nm:typeof d.nm==='string'?d.nm.slice(0,10):'',u:id};
+const isNew=!o;pp.set(id,{pr,t:Date.now(),q:+d.q||0});flush();if(isNew&&cur)pub(Object.assign({},cur,{q:++seq}))};
+load(0).then(()=>{BROKERS.forEach(url=>{try{const c=window.mqtt.connect(url,{clientId:'yb_'+UID+'_'+Math.random().toString(36).slice(2,6),clean:true,keepalive:30,reconnectPeriod:4000,connectTimeout:8000,will:{topic:TOPIC,payload:JSON.stringify({u:UID,bye:1}),qos:0,retain:false}});
+c.on('connect',()=>{c.subscribe(TOPIC,{qos:0});net('on');if(cur)pub(Object.assign({},cur,{q:++seq}))});
+c.on('close',()=>{if(!live())net('wait')});c.on('error',()=>{});c.on('message',onMsg);cl.push(c)}catch(e){}});
+setTimeout(()=>{if(!live())net('wait')},9000)},()=>{net('off');$('on').title='연결 모듈을 불러오지 못했어요 · 새로고침해 주세요'});
+room={presence(o){cur=Object.assign({},o,{u:UID});const j=JSON.stringify(cur),now=Date.now();if((j===last&&now-lastT<4000)||now-lastT<250)return;last=j;lastT=now;pub(Object.assign({},cur,{q:++seq}))},connected:()=>live()>0};
+setInterval(flush,3000);
+addEventListener('pagehide',()=>pub({u:UID,bye:1}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cur){lastT=0;room.presence(cur)}});
+})();
 const clk=new THREE.Clock(),tg=new THREE.Vector3(),phi_=()=>phi;
 (function tick(){requestAnimationFrame(tick);const dt=Math.min(clk.getDelta(),.05),t=clk.elapsedTime;
 const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)+hold,s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);moving=false;
